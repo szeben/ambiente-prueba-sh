@@ -14,25 +14,29 @@ class StockMoveLine(models.Model):
     customer_id = fields.Many2one('res.partner', string='Cliente o Proveedor',related='picking_id.partner_id')
     entrada = fields.Float(string='Entrada',compute='_compute_entrada')
     salida = fields.Float(string='Salida',compute='_compute_salida')
-    saldo_existencia = fields.Float(string='Saldo o existencia', compute='_compute_saldo_existencia')
+    saldo_existencia = fields.Float(string='Saldo en existencia', compute='_compute_saldo_existencia')
 
     @api.depends('qty_done','reference')
     def _compute_entrada(self):        
         for record in self:
-            a = "/IN" in record.reference
-            b = "/INT" in record.reference
-            c = "/RET" in record.reference
-            if a == True or b == True or c == True:
+            
+            if record.location_id.id != 14:
+                record.entrada = record.qty_done
+            
+            elif record.location_id.usage != "inventory":
                 record.entrada = record.qty_done
             else:
-                record.entrada = 0.0            
+                record.entrada = 0.0
+
+
 
     @api.depends('qty_done','reference')
     def _compute_salida(self):
         for record in self:
-            a = "/OUT" in record.reference
-            b = "/INT" in record.reference
-            if a == True or b == True:
+
+            if record.location_id.id == 14:
+                record.salida = record.qty_done
+            elif record.location_id.usage == "inventory":
                 record.salida = record.qty_done
             else:
                 record.salida = 0.0
