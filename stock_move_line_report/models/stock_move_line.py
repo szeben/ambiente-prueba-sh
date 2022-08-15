@@ -21,9 +21,10 @@ class StockMoveLine(models.Model):
         for record in self:
             
             if record.location_id.id != 14:
+                record.entrada = record.qty_done            
+            elif record.location_id.usage == "inventory":
                 record.entrada = record.qty_done
-            
-            elif record.location_id.usage != "inventory":
+            elif record.location_id.usage == "internal":
                 record.entrada = record.qty_done
             else:
                 record.entrada = 0.0
@@ -36,7 +37,9 @@ class StockMoveLine(models.Model):
 
             if record.location_id.id == 14:
                 record.salida = record.qty_done
-            elif record.location_id.usage == "inventory":
+            elif record.location_id.usage != "inventory":
+                record.salida = record.qty_done
+            elif record.location_id.usage == "internal":
                 record.salida = record.qty_done
             else:
                 record.salida = 0.0

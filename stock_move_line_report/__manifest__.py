@@ -3,7 +3,7 @@
     'name': 'Informe de movimiento de productos',
 
     'summary': """
-            Informe de movimiento de productos
+            Informe de movimiento de productos.
         """,
 
     'description': """
