@@ -20,7 +20,7 @@ class StockMoveLine(models.Model):
     def _compute_entrada(self):        
         for record in self:
             #   Cantidad de producto actualizada
-            if record.location_id.id == 14 and record.location_id.name == 'Virtual Locations':
+            if record.location_id.id == 14 and record.location_id.name == 'Virtual Locations/Inventory adjustment':
                 record.entrada = record.qty_done
 
             # Recibo
@@ -41,7 +41,7 @@ class StockMoveLine(models.Model):
     def _compute_salida(self):
         for record in self:
             #   Cantidad de producto actualizada
-            if record.location_id.id == 14 and record.location_dest_id.name == 'Virtual Locations':
+            if record.location_id.id == 14 and record.location_dest_id.name == 'Virtual Locations/Inventory adjustment':
                 record.salida = record.qty_done
 
             #Transferencia Interna
@@ -60,4 +60,3 @@ class StockMoveLine(models.Model):
         for record in self:
             #record.saldo_existencia = record.salida + record.entrada
             record.saldo_existencia = 0.0
-
