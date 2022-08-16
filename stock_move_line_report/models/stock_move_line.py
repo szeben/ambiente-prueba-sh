@@ -46,7 +46,7 @@ class StockMoveLine(models.Model):
 
             #Transferencia Interna
             if record.picking_code == "internal":
-                record.entrada = record.qty_done
+                record.salida = record.qty_done
 
             #Envio
             elif record.picking_code == "outgoing":
