@@ -41,11 +41,11 @@ class StockMoveLine(models.Model):
     def _compute_salida(self):
         for record in self:
             #   Cantidad de producto actualizada
-            if record.location_id.id != 14 and record.location_dest_id.name == 'Inventory adjustment':
+            if record.location_id.id == 14 and record.location_dest_id.name == 'Inventory adjustment':
                 record.salida = record.qty_done
 
             #Transferencia Interna
-            if record.picking_code == "internal":
+            elif record.picking_code == "internal":
                 record.salida = record.qty_done
 
             #Envio
