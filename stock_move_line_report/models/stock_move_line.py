@@ -19,33 +19,45 @@ class StockMoveLine(models.Model):
     @api.depends('qty_done','reference')
     def _compute_entrada(self):        
         for record in self:
-            
-            if record.location_id.id != 14:
-                record.entrada = record.qty_done            
-            elif record.location_id.usage == "inventory":
+            #   Cantidad de producto actualizada
+            if record.location_id.id == 14 and record.location_id.name == 'Virtual Locations':
                 record.entrada = record.qty_done
-            elif record.location_id.usage == "internal":
+
+            # Recibo
+            elif record.picking_code == "incoming":
+                record.entrada = record.qty_done
+
+            #Transferencia Interna
+            elif record.picking_code == "internal":
+                record.entrada = record.qty_done
+
+            #Fabricacion
+            elif record.picking_code == "mrp_operation":
                 record.entrada = record.qty_done
             else:
                 record.entrada = 0.0
 
-
-
     @api.depends('qty_done','reference')
     def _compute_salida(self):
         for record in self:
+            #   Cantidad de producto actualizada
+            if record.location_id.id == 14 and record.location_dest_id.name == 'Virtual Locations':
+                record.salida = record.qty_done
 
-            if record.location_id.id == 14:
+            #Transferencia Interna
+            if record.picking_code == "internal":
+                record.entrada = record.qty_done
+
+            #Envio
+            elif record.picking_code == "outgoing":
                 record.salida = record.qty_done
-            elif record.location_id.usage != "inventory":
-                record.salida = record.qty_done
-            elif record.location_id.usage == "internal":
-                record.salida = record.qty_done
+
             else:
                 record.salida = 0.0
 
     @api.depends('entrada','salida')
     def _compute_saldo_existencia(self):
         for record in self:
-            record.saldo_existencia = record.salida + record.entrada
+            #record.saldo_existencia = record.salida + record.entrada
+            record.saldo_existencia = 0.0
 
