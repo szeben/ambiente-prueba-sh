@@ -41,7 +41,7 @@ class StockMoveLine(models.Model):
     def _compute_salida(self):
         for record in self:
             #   Cantidad de producto actualizada
-            if record.location_id.id == 14 and record.location_dest_id.name == 'Inventory adjustment':
+            if record.picking_code == False and record.location_dest_id.name == 'Inventory adjustment':
                 record.salida = record.qty_done
 
             #Transferencia Interna
@@ -53,7 +53,7 @@ class StockMoveLine(models.Model):
                 record.salida = record.qty_done
 
             else:
-                record.salida = record.qty_done
+                record.salida = 0.0
 
     @api.depends('entrada','salida')
     def _compute_saldo_existencia(self):
