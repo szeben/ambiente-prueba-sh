@@ -53,7 +53,7 @@ class StockMoveLine(models.Model):
                 record.salida = record.qty_done
 
             else:
-                record.salida = 0.0
+                record.salida = record.qty_done
 
     @api.depends('entrada','salida')
     def _compute_saldo_existencia(self):
