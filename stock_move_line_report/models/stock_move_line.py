@@ -57,6 +57,33 @@ class StockMoveLine(models.Model):
 
     @api.depends('entrada','salida')
     def _compute_saldo_existencia(self):
+        anterior =0.0
+
         for record in self:
             #record.saldo_existencia = record.salida + record.entrada
-            record.saldo_existencia = 0.0
+            existencia = record.product_id.qty_available - record.qty_done
+
+            if existencia == 0:
+                record.saldo_existencia = record.qty_done
+            elif record.picking_code == False and record.location_dest_id.name == 'Inventory adjustment':
+                record.saldo_existencia = record.qty_done + anterior
+            elif record.picking_code == "internal":
+                record.saldo_existencia = record.qty_done + anterior
+            elif record.picking_code == "outgoing":
+                record.saldo_existencia = anterior - record.qty_done
+            else:
+                record.saldo_existencia = record.qty_done + anterior            
+            anterior = record.saldo_existencia
+
+
+
+            # x = record.product_id.qty_available
+            # if x == record.qty_done:
+            #     record.saldo_existencia = x
+            # #indice = record.index(self)
+            # #if record[0] in self:
+            #     #record.saldo_existencia = x
+            # else:
+            #     indice = record.index(self)
+            #     position = indice - 1
+            #     record.saldo_existencia = self[position].product_id.qty_available - self[position].product_id.qty_done
