@@ -66,7 +66,7 @@ class StockMoveLine(models.Model):
             if existencia == 0:
                 record.saldo_existencia = record.qty_done
             elif record.picking_code == False and record.location_dest_id.name == 'Inventory adjustment':
-                record.saldo_existencia = record.qty_done + anterior
+                record.saldo_existencia = anterior
             elif record.picking_code == "internal":
                 record.saldo_existencia = record.qty_done + anterior
             elif record.picking_code == "outgoing":
