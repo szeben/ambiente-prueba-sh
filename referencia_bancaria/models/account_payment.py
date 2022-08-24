@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+
+from typing_extensions import Self
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
+
+class accountPayme(models.Model):
+    _inherit = "account.payment"
+
+    referencia = fields.Char(string='Nro. Referencia')  
+    is_bank_selected = fields.Boolean(string="is bank selected", default=False)
+    # compute='_compute_field'
+    # @api.model_create_multi
+    # @api.depends('referencia')
+    # def _compute_field(self):
+    #     if self.referencia == True and self.is_bank_selected == False:
+    #         print('computed', self.is_bank_selected, self.referencia)
+    #         self.is_bank_selected = True
+
+
+    _sql_constraints = [
+        ('referencia_unique', 'unique(referencia)', 'Nro. de Referencia ya existe!')
+    ]
+
+
+
+    @api.onchange('journal_id')
+    def _change_journal_id(self):
+
+        if self.journal_id.type == 'bank':
+            self.is_bank_selected = True
+        else:     
+            self.is_bank_selected = False 
+            self.referencia = ''
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        payments = super().create(vals_list)
+
+        if payments['referencia'] == False and payments['journal_id'].type == 'bank':
+            self.referencia = ''
+            raise ValidationError('El Campo Nro. de Referencia no puede estar Vacioooooooo')
+        else:
+            return payments
+        
