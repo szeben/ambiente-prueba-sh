@@ -9,20 +9,10 @@ class accountPayme(models.Model):
 
     referencia = fields.Char(string='Nro. Referencia')  
     is_bank_selected = fields.Boolean(string="is bank selected", default=False)
-    # compute='_compute_field'
-    # @api.model_create_multi
-    # @api.depends('referencia')
-    # def _compute_field(self):
-    #     if self.referencia == True and self.is_bank_selected == False:
-    #         print('computed', self.is_bank_selected, self.referencia)
-    #         self.is_bank_selected = True
-
 
     _sql_constraints = [
         ('referencia_unique', 'unique(referencia)', 'Nro. de Referencia ya existe!')
     ]
-
-
 
     @api.onchange('journal_id')
     def _change_journal_id(self):

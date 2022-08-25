@@ -31,7 +31,6 @@ class accountPaymeRegister(models.TransientModel):
             return payment_vals
 
     def _create_payment_vals_from_batch(self):
-        print('batch')
         if self.referencia == False and self.journal_id.type == 'bank':
             self.referencia = ''
             raise ValidationError('El Campo Nro. de Referencia no puede estar Vacio')
