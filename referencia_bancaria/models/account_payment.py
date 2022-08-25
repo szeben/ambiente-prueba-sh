@@ -28,7 +28,7 @@ class accountPayme(models.Model):
 
         if payments['referencia'] == False and payments['journal_id'].type == 'bank':
             self.referencia = ''
-            raise ValidationError('El Campo Nro. de Referencia no puede estar Vacioooooooo')
+            raise ValidationError('El Campo Nro. de Referencia no puede estar Vacio')
         else:
             return payments
         
