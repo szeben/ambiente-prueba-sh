@@ -4,12 +4,14 @@
         <field name='name'>stock.quant.reposition.tree</field>
         <field name='model'>stock.quant.reposition</field>
         <field name='arch' type='xml'>
-            <tree string='Reposicion de Inventario' default_order="product_id" create="0" edit="1" import="1" sample="1" js_class="singleton_list" editable="bottom">
+            <tree string ="Reposicion de Inventario">
+            <!--<tree string='Reposicion de Inventario' default_order="product_id" create="0" edit="1" import="1" sample="1" js_class="singleton_list" editable="bottom">-->
                 <!--<header>
                     <button string="Ok" class="oe_highlight" type="action" 
                     name="stock_move_line_report_rep.action_stock_inventory_reposition"/>
                 </header>-->
                 <field name='product_id'/>
+                <field name="producto"/>
                 <field name='deposito_principal_mgta'/>
                 <field name='deposito_principal_ccs'/>
                 <field name='deposito_principal_bto'/>

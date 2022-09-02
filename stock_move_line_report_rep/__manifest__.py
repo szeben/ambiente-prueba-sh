@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','stock'],
+    'depends': ['base','stock','product_available_by_branch_kanban'],
 
     # always loaded
     'data': [
@@ -32,4 +32,12 @@
     #'demo': [
     #    'demo/demo.xml',
     #],
+    'assets': {
+        'web.assets_backend': [
+            'stock_move_line_report_rep/static/src/js/inventory_sigletone_list_controller.js',        
+        ],
+        'web.assets_qweb': [
+            'stock_move_line_report_rep/static/src/xml/inventory_reposition.xml',
+        ],
+    },
 }
