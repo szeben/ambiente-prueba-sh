@@ -79,7 +79,7 @@ class StockInventoryReposition(models.TransientModel):
         compania = self.env.user.company_id
         quants = self.env['stock.quant'].search([('company_id','=',compania.id)])
         reposiciones = self.env['stock.quant.reposition'].search([])
-        products = self.env['product.product'].search([('type','=','product')])
+        products = self.env['product.product'].search([('detailed_type','=','product')])
             
         if quants and reposiciones and products:
             reposiciones = self.env['stock.quant.reposition']
@@ -100,28 +100,28 @@ class StockInventoryReposition(models.TransientModel):
             quant_val = 0.0
             for product in products:
                 product_id = product.id
-                quant_product = self.env['stock.quant'].search([('product_id','=',product_id)])
+                quant_product = self.env['stock.quant'].search([('product_id','=',product_id),('inventory_date','>=',self.desde_fecha),('inventory_date','<=',self.hasta_fecha)])
                 #recorro los quants de cada producto
                 name_categoria = product.categ_id.name + ' ' + product.name
                 
 
                 for qproduct in quant_product:
-                    # is_main = qproduct.location_id.is_main
+                    # is_main = qproduct.location_id.
                     # if is_main == True:
                     #Rama Caracas WHCCS
-                    if qproduct.location_id.warehouse_id.branch_id.id == 1:
+                    if qproduct.location_id.warehouse_id.branch_id.id == 1 and qproduct.location_id.warehouse_id.is_main == True:
                         quant_ccs = qproduct.quantity
                         #new = reposiciones.create({'product_id' : producto, 'producto': name_categoria, 'deposito_principal_ccs': quant_ccs})
                     #Rama Barquisimeto WHBTO
-                    if qproduct.location_id.warehouse_id.branch_id.id == 2:
+                    if qproduct.location_id.warehouse_id.branch_id.id == 2 and qproduct.location_id.warehouse_id.is_main == True:
                         quant_bto = qproduct.quantity
                         #new = reposiciones.create({'product_id' : producto, 'producto': name_categoria, 'deposito_principal_bto': quant_bto})
                     #Rama Margarita WHMgt
-                    if qproduct.location_id.warehouse_id.branch_id.id == 3:
+                    if qproduct.location_id.warehouse_id.branch_id.id == 3 and qproduct.location_id.warehouse_id.is_main == True:
                         quant_mgt = qproduct.quantity
                         #new = reposiciones.create({'product_id' : producto, 'producto': name_categoria, 'deposito_principal_mgta': quant_mgt})
                     #Rama Valencia WHVAL
-                    if qproduct.location_id.warehouse_id.branch_id.id == 4:
+                    if qproduct.location_id.warehouse_id.branch_id.id == 4 and qproduct.location_id.warehouse_id.is_main == True:
                         quant_val = qproduct.quantity
                         #new = reposiciones.create({'product_id' : producto, 'producto': name_categoria, 'deposito_principal_val': quant_val})
                 new = reposiciones.create({'product_id' : product_id, 'producto': name_categoria, 'deposito_principal_mgta': quant_mgt, 'deposito_principal_ccs': quant_ccs, 'deposito_principal_bto': quant_bto, 'deposito_principal_val': quant_val})
