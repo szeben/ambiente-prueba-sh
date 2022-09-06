@@ -13,10 +13,10 @@ class accountPayme(models.Model):
         ('referencia_unique', 'unique(referencia)', 'Nro. de Referencia ya existe!')
     ]
 
-    @api.onchange('journal_id')
+    @api.onchange('journal_id','is_internal_transfer')
     def _change_journal_id(self):
-
-        if self.journal_id.type == 'bank':
+        
+        if self.journal_id.type == 'bank' and self.is_internal_transfer == False:
             self.is_bank_selected = True
         else:     
             self.is_bank_selected = False 
@@ -26,7 +26,7 @@ class accountPayme(models.Model):
     def create(self, vals_list):
         payments = super().create(vals_list)
 
-        if payments['referencia'] == False and payments['journal_id'].type == 'bank':
+        if payments['referencia'] == False and payments['journal_id'].type == 'bank' and payments['is_internal_transfer'] == False:
             self.referencia = ''
             raise ValidationError('El Campo Nro. de Referencia no puede estar Vacio')
         else:
