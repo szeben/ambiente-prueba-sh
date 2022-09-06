@@ -23,8 +23,8 @@ class StockInventoryReposition(models.TransientModel):
     #quant_ids = fields.Many2many('stock.quant')
     #inventory_adjustment_name = fields.Char(default=_default_inventory_adjustment_name)
     show_info = fields.Boolean('Show warning')
-    desde_fecha = fields.Date(string='Desde', default=lambda self: fields.Date.today())
-    hasta_fecha = fields.Date(string='Hasta', compute='_compute_hasta_fecha')
+    desde_fecha = fields.Datetime(string='Desde', default=lambda self: fields.Date.today())
+    hasta_fecha = fields.Datetime(string='Hasta', compute='_compute_hasta_fecha')
 
     _depends = {
         'account.move': [
@@ -46,51 +46,45 @@ class StockInventoryReposition(models.TransientModel):
     @api.depends('desde_fecha')
     def _compute_hasta_fecha(self):
         self.hasta_fecha = self.desde_fecha + datetime.timedelta(days=15)
-
-    # @property
-    # def _table_query(self):
-    #     return '%s %s %s' % (self._select(), self._from(), self._where())
-
-    # @api.model
-    # def _select(self):
-    #     return '''
-    #         SELECT
-
-    #         '''
-
-    # @api.model
-    # def _from(self):
-    #     return '''
-    #         FROM stock.quant
-    #     '''
-
-    # @api.model
-    # def _where(self):
-    #     return '''
-    #         WHERE move.move_type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
-    #             AND line.account_id IS NOT NULL
-    #             AND NOT line.exclude_from_invoice_tab
-    #     '''
-
     
     def action_apply(self):
 
-        # Crear Logica para obtener la consulta de reposicion de inventario desde la fecha seleccionada hasta 15 dias despues de la seleccionada
+        # Logica para obtener la consulta de reposicion de inventario desde la fecha seleccionada hasta 15 dias despues de la seleccionada
         compania = self.env.user.company_id
         quants = self.env['stock.quant'].search([('company_id','=',compania.id)])
         reposiciones = self.env['stock.quant.reposition'].search([])
         products = self.env['product.product'].search([('detailed_type','=','product')])
             
         if quants and reposiciones and products:
-            reposiciones = self.env['stock.quant.reposition']
-            for quant in quants:
-                if quant.location_id.location_id.name == 'WHCCS':
-                    quant_ccs = quant.quantity
-                producto = quant.product_id.id
-                name_categoria = quant.product_id.categ_id.name + ' ' + quant.product_id.name
-                for repo in reposiciones:
-                    if repo.product_id.id == quant.product_id.id:
-                        update = reposiciones.write({'product_id' : producto, 'producto': name_categoria, 'deposito_principal_ccs': quant_ccs})
+            repo = self.env['stock.quant.reposition'].search([]).sudo().unlink()
+            quant_ccs = 0.0
+            quant_mgt = 0.0
+            quant_bto = 0.0
+            quant_val = 0.0            
+
+            for product in products:
+                product_id = product.id
+                quant_product = self.env['stock.quant'].search([('product_id','=',product_id),('in_date','>=',self.desde_fecha),('in_date','<=',self.hasta_fecha)])
+                name_categoria = product.categ_id.name + ' ' + product.name
+                
+                #recorro los quants de cada producto
+                for qproduct in quant_product:
+                    #Rama Caracas WHCCS
+                    if qproduct.location_id.warehouse_id.branch_id.id == 1 and qproduct.location_id.warehouse_id.is_main == True:
+                        quant_ccs = qproduct.quantity
+                    #Rama Barquisimeto WHBTO
+                    if qproduct.location_id.warehouse_id.branch_id.id == 2 and qproduct.location_id.warehouse_id.is_main == True:
+                        quant_bto = qproduct.quantity
+                    #Rama Margarita WHMgt
+                    if qproduct.location_id.warehouse_id.branch_id.id == 3 and qproduct.location_id.warehouse_id.is_main == True:
+                        quant_mgt = qproduct.quantity
+                    #Rama Valencia WHVAL
+                    if qproduct.location_id.warehouse_id.branch_id.id == 4 and qproduct.location_id.warehouse_id.is_main == True:
+                        quant_val = qproduct.quantity
+                    #for reposicion in reposiciones:
+                    #    write = reposicion.write({'product_id' : product_id, 'producto': name_categoria, 'deposito_principal_mgta': quant_mgt, 'deposito_principal_ccs': quant_ccs, 'deposito_principal_bto': quant_bto, 'deposito_principal_val': quant_val})
+                new = reposiciones.create({'product_id' : product_id, 'producto': name_categoria, 'deposito_principal_mgta': quant_mgt, 'deposito_principal_ccs': quant_ccs, 'deposito_principal_bto': quant_bto, 'deposito_principal_val': quant_val})
+
         elif quants and products:
             #Recorro los productos
             reposiciones = self.env['stock.quant.reposition']
@@ -100,11 +94,10 @@ class StockInventoryReposition(models.TransientModel):
             quant_val = 0.0
             for product in products:
                 product_id = product.id
-                quant_product = self.env['stock.quant'].search([('product_id','=',product_id),('inventory_date','>=',self.desde_fecha),('inventory_date','<=',self.hasta_fecha)])
+                quant_product = self.env['stock.quant'].search([('product_id','=',product_id),('in_date','>=',self.desde_fecha),('in_date','<=',self.hasta_fecha)])
                 #recorro los quants de cada producto
                 name_categoria = product.categ_id.name + ' ' + product.name
                 
-
                 for qproduct in quant_product:
                     # is_main = qproduct.location_id.
                     # if is_main == True:
@@ -131,26 +124,3 @@ class StockInventoryReposition(models.TransientModel):
                 'type': 'ir.actions.client',
                 'tag': 'reload',
                 }
-
-
-
-
-
-        #self.env.cr.execute("""CREATE or REPLACE VIEW %s as (
-        # quant = self.env.cr.execute("""
-        #                    SELECT
-        #                       %s
-        #                    FROM
-        #                       %s
-        #                     WHERE
-        #                       %S
-        #   """ % (self._table_query, self._select(), self._from(),self._where()))
-        #return 0
-        ########################
-        
-
-
-        #return self.quant_ids.with_context(
-        #    inventory_name=self.inventory_adjustment_name).action_apply_inventory()
-    
-    
